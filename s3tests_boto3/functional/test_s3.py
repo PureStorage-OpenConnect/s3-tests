@@ -1790,6 +1790,7 @@ def test_bucket_list_return_data_versioning():
 @attr(method='get')
 @attr(operation='list all objects (anonymous)')
 @attr(assertion='succeeds')
+@attr('canned_acl')
 def test_bucket_list_objects_anonymous():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -1803,6 +1804,7 @@ def test_bucket_list_objects_anonymous():
 @attr(operation='list all objects (anonymous) with list-objects-v2')
 @attr(assertion='succeeds')
 @attr('list-objects-v2')
+@attr('canned_acl')
 def test_bucket_listv2_objects_anonymous():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -1921,6 +1923,7 @@ def _do_wait_completion(t):
 @attr(method='put')
 @attr(operation='concurrent set of acls on a bucket')
 @attr(assertion='works')
+@attr('canned_acl')
 def test_bucket_concurrent_set_canned_acl():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -1992,6 +1995,7 @@ def get_http_response(**kwargs):
 @attr(operation='read contents that were never written to raise one error response')
 @attr(assertion='RequestId appears in the error response')
 @attr('fails_on_dbstore')
+@attr('canned_acl')
 def test_object_requestid_matches_header_on_error():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -2360,6 +2364,7 @@ def _get_post_url(bucket_name):
 @attr(method='post')
 @attr(operation='anonymous browser based upload via POST request')
 @attr(assertion='succeeds and returns written data')
+@attr('canned_acl')
 def test_post_object_anonymous_request():
     bucket_name = get_new_bucket_name()
     client = get_client()
@@ -2420,6 +2425,7 @@ def test_post_object_authenticated_request():
 @attr(method='post')
 @attr(operation='authenticated browser based upload via POST request, no content-type header')
 @attr(assertion='succeeds and returns written data')
+@attr('canned_acl')
 def test_post_object_authenticated_no_content_type():
     bucket_name = get_new_bucket_name()
     client = get_client()
@@ -2461,6 +2467,7 @@ def test_post_object_authenticated_no_content_type():
 @attr(method='post')
 @attr(operation='authenticated browser based upload via POST request, bad access key')
 @attr(assertion='fails')
+@attr('canned_acl')
 def test_post_object_authenticated_request_bad_access_key():
     bucket_name = get_new_bucket_name()
     client = get_client()
@@ -2500,6 +2507,7 @@ def test_post_object_authenticated_request_bad_access_key():
 @attr(method='post')
 @attr(operation='anonymous browser based upload via POST request')
 @attr(assertion='succeeds with status 201')
+@attr('canned_acl')
 def test_post_object_set_success_code():
     bucket_name = get_new_bucket_name()
     client = get_client()
@@ -2519,6 +2527,7 @@ def test_post_object_set_success_code():
 @attr(method='post')
 @attr(operation='anonymous browser based upload via POST request')
 @attr(assertion='succeeds with status 204')
+@attr('canned_acl')
 def test_post_object_set_invalid_success_code():
     bucket_name = get_new_bucket_name()
     client = get_client()
@@ -2738,6 +2747,7 @@ def test_post_object_escaped_field_values():
 @attr(method='post')
 @attr(operation='authenticated browser based upload via POST request')
 @attr(assertion='succeeds and returns redirect url')
+@attr('canned_acl')
 def test_post_object_success_redirect_action():
     bucket_name = get_new_bucket_name()
     client = get_client()
@@ -3811,6 +3821,7 @@ def _setup_bucket_acl(bucket_acl=None):
 @attr(method='get')
 @attr(operation='publically readable bucket')
 @attr(assertion='bucket is readable')
+@attr('canned_acl')
 def test_object_raw_get():
     bucket_name = _setup_bucket_object_acl('public-read', 'public-read')
 
@@ -3822,6 +3833,7 @@ def test_object_raw_get():
 @attr(method='get')
 @attr(operation='deleted object and bucket')
 @attr(assertion='fails 404')
+@attr('canned_acl')
 def test_object_raw_get_bucket_gone():
     bucket_name = _setup_bucket_object_acl('public-read', 'public-read')
     client = get_client()
@@ -3840,6 +3852,7 @@ def test_object_raw_get_bucket_gone():
 @attr(method='get')
 @attr(operation='deleted object and bucket')
 @attr(assertion='fails 404')
+@attr('canned_acl')
 def test_object_delete_key_bucket_gone():
     bucket_name = _setup_bucket_object_acl('public-read', 'public-read')
     client = get_client()
@@ -3858,6 +3871,7 @@ def test_object_delete_key_bucket_gone():
 @attr(method='get')
 @attr(operation='deleted object')
 @attr(assertion='fails 404')
+@attr('canned_acl')
 def test_object_raw_get_object_gone():
     bucket_name = _setup_bucket_object_acl('public-read', 'public-read')
     client = get_client()
@@ -3923,6 +3937,7 @@ def test_bucket_head_extended():
 @attr(method='get')
 @attr(operation='unauthenticated on private bucket')
 @attr(assertion='succeeds')
+@attr('canned_acl')
 def test_object_raw_get_bucket_acl():
     bucket_name = _setup_bucket_object_acl('private', 'public-read')
 
@@ -3934,6 +3949,7 @@ def test_object_raw_get_bucket_acl():
 @attr(method='get')
 @attr(operation='unauthenticated on private object')
 @attr(assertion='fails 403')
+@attr('canned_acl')
 def test_object_raw_get_object_acl():
     bucket_name = _setup_bucket_object_acl('public-read', 'private')
 
@@ -3945,6 +3961,7 @@ def test_object_raw_get_object_acl():
 
 @attr(resource='object')
 @attr(method='ACLs')
+@attr('canned_acl')
 @attr(operation='authenticated on public bucket/object')
 @attr(assertion='succeeds')
 def test_object_raw_authenticated():
@@ -3973,6 +3990,7 @@ def test_object_raw_response_headers():
 
 @attr(resource='object')
 @attr(method='ACLs')
+@attr('canned_acl')
 @attr(operation='authenticated on private bucket/public object')
 @attr(assertion='succeeds')
 def test_object_raw_authenticated_bucket_acl():
@@ -3984,6 +4002,7 @@ def test_object_raw_authenticated_bucket_acl():
 
 @attr(resource='object')
 @attr(method='ACLs')
+@attr('canned_acl')
 @attr(operation='authenticated on public bucket/private object')
 @attr(assertion='succeeds')
 def test_object_raw_authenticated_object_acl():
@@ -3997,6 +4016,7 @@ def test_object_raw_authenticated_object_acl():
 @attr(method='get')
 @attr(operation='authenticated on deleted object and bucket')
 @attr(assertion='fails 404')
+@attr('canned_acl')
 def test_object_raw_authenticated_bucket_gone():
     bucket_name = _setup_bucket_object_acl('public-read', 'public-read')
     client = get_client()
@@ -4013,6 +4033,7 @@ def test_object_raw_authenticated_bucket_gone():
 @attr(method='get')
 @attr(operation='authenticated on deleted object')
 @attr(assertion='fails 404')
+@attr('canned_acl')
 def test_object_raw_authenticated_object_gone():
     bucket_name = _setup_bucket_object_acl('public-read', 'public-read')
     client = get_client()
@@ -4029,9 +4050,9 @@ def test_object_raw_authenticated_object_gone():
 @attr(operation='x-amz-expires check not expired')
 @attr(assertion='succeeds')
 def test_object_raw_get_x_amz_expires_not_expired():
-    bucket_name = _setup_bucket_object_acl('public-read', 'public-read')
+    obj = get_new_bucket_resource().put_object(Key='foo')
     client = get_client()
-    params = {'Bucket': bucket_name, 'Key': 'foo'}
+    params = {'Bucket': obj.bucket_name, 'Key': obj.key}
 
     url = client.generate_presigned_url(ClientMethod='get_object', Params=params, ExpiresIn=100000, HttpMethod='GET')
 
@@ -4043,9 +4064,9 @@ def test_object_raw_get_x_amz_expires_not_expired():
 @attr(operation='check x-amz-expires value out of range zero')
 @attr(assertion='fails 403')
 def test_object_raw_get_x_amz_expires_out_range_zero():
-    bucket_name = _setup_bucket_object_acl('public-read', 'public-read')
+    obj = get_new_bucket_resource().put_object(Key='foo')
     client = get_client()
-    params = {'Bucket': bucket_name, 'Key': 'foo'}
+    params = {'Bucket': obj.bucket_name, 'Key': obj.key}
 
     url = client.generate_presigned_url(ClientMethod='get_object', Params=params, ExpiresIn=0, HttpMethod='GET')
 
@@ -4057,9 +4078,9 @@ def test_object_raw_get_x_amz_expires_out_range_zero():
 @attr(operation='check x-amz-expires value out of max range')
 @attr(assertion='fails 403')
 def test_object_raw_get_x_amz_expires_out_max_range():
-    bucket_name = _setup_bucket_object_acl('public-read', 'public-read')
+    obj = get_new_bucket_resource().put_object(Key='foo')
     client = get_client()
-    params = {'Bucket': bucket_name, 'Key': 'foo'}
+    params = {'Bucket': obj.bucket_name, 'Key': obj.key}
 
     url = client.generate_presigned_url(ClientMethod='get_object', Params=params, ExpiresIn=609901, HttpMethod='GET')
 
@@ -4071,9 +4092,9 @@ def test_object_raw_get_x_amz_expires_out_max_range():
 @attr(operation='check x-amz-expires value out of positive range')
 @attr(assertion='succeeds')
 def test_object_raw_get_x_amz_expires_out_positive_range():
-    bucket_name = _setup_bucket_object_acl('public-read', 'public-read')
+    obj = get_new_bucket_resource().put_object(Key='foo')
     client = get_client()
-    params = {'Bucket': bucket_name, 'Key': 'foo'}
+    params = {'Bucket': obj.bucket_name, 'Key': obj.key}
 
     url = client.generate_presigned_url(ClientMethod='get_object', Params=params, ExpiresIn=-7, HttpMethod='GET')
 
@@ -4102,6 +4123,7 @@ def test_object_anon_put():
 @attr(method='put')
 @attr(operation='unauthenticated, publically writable object')
 @attr(assertion='succeeds')
+@attr('canned_acl')
 def test_object_anon_put_write_access():
     bucket_name = _setup_bucket_acl('public-read-write')
     client = get_client()
@@ -4511,6 +4533,7 @@ def test_bucket_create_exists_nonowner():
 @attr(operation='re-create with existing acl')
 @attr(assertion='fails 409')
 @attr('fails_on_dbstore')
+@attr('canned_acl')
 def test_bucket_recreate_overwrite_acl():
     bucket_name = get_new_bucket_name()
     client = get_client()
@@ -4526,6 +4549,7 @@ def test_bucket_recreate_overwrite_acl():
 @attr(operation='re-create with new acl')
 @attr(assertion='fails 409')
 @attr('fails_on_dbstore')
+@attr('canned_acl')
 def test_bucket_recreate_new_acl():
     bucket_name = get_new_bucket_name()
     client = get_client()
@@ -4602,6 +4626,7 @@ def test_bucket_acl_default():
 @attr(operation='public-read acl')
 @attr(assertion='read back expected defaults')
 @attr('fails_on_aws') # <Error><Code>IllegalLocationConstraintException</Code><Message>The unspecified location constraint is incompatible for the region specific endpoint this request was sent to.</Message>
+@attr('canned_acl')
 def test_bucket_acl_canned_during_create():
     bucket_name = get_new_bucket_name()
     client = get_client()
@@ -4638,6 +4663,7 @@ def test_bucket_acl_canned_during_create():
 @attr(method='put')
 @attr(operation='acl: public-read,private')
 @attr(assertion='read back expected values')
+@attr('canned_acl')
 def test_bucket_acl_canned():
     bucket_name = get_new_bucket_name()
     client = get_client()
@@ -4692,6 +4718,7 @@ def test_bucket_acl_canned():
 @attr(method='put')
 @attr(operation='acl: public-read-write')
 @attr(assertion='read back expected values')
+@attr('canned_acl')
 def test_bucket_acl_canned_publicreadwrite():
     bucket_name = get_new_bucket_name()
     client = get_client()
@@ -4735,6 +4762,7 @@ def test_bucket_acl_canned_publicreadwrite():
 @attr(method='put')
 @attr(operation='acl: authenticated-read')
 @attr(assertion='read back expected values')
+@attr('canned_acl')
 def test_bucket_acl_canned_authenticatedread():
     bucket_name = get_new_bucket_name()
     client = get_client()
@@ -4801,6 +4829,7 @@ def test_object_acl_default():
 @attr(method='put')
 @attr(operation='acl public-read')
 @attr(assertion='read back expected values')
+@attr('canned_acl')
 def test_object_acl_canned_during_create():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -4839,6 +4868,7 @@ def test_object_acl_canned_during_create():
 @attr(method='put')
 @attr(operation='acl public-read,private')
 @attr(assertion='read back expected values')
+@attr('canned_acl')
 def test_object_acl_canned():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -4896,6 +4926,7 @@ def test_object_acl_canned():
 @attr(method='put')
 @attr(operation='acl public-read-write')
 @attr(assertion='read back expected values')
+@attr('canned_acl')
 def test_object_acl_canned_publicreadwrite():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -4941,6 +4972,7 @@ def test_object_acl_canned_publicreadwrite():
 @attr(method='put')
 @attr(operation='acl authenticated-read')
 @attr(assertion='read back expected values')
+@attr('canned_acl')
 def test_object_acl_canned_authenticatedread():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -4979,6 +5011,7 @@ def test_object_acl_canned_authenticatedread():
 @attr(operation='acl bucket-owner-read')
 @attr(assertion='read back expected values')
 @attr('fails_on_dbstore')
+@attr('canned_acl')
 def test_object_acl_canned_bucketownerread():
     bucket_name = get_new_bucket_name()
     main_client = get_client()
@@ -5026,6 +5059,7 @@ def test_object_acl_canned_bucketownerread():
 @attr(operation='acl bucket-owner-read')
 @attr(assertion='read back expected values')
 @attr('fails_on_dbstore')
+@attr('canned_acl')
 def test_object_acl_canned_bucketownerfullcontrol():
     bucket_name = get_new_bucket_name()
     main_client = get_client()
@@ -5073,6 +5107,7 @@ def test_object_acl_canned_bucketownerfullcontrol():
 @attr(operation='set write-acp')
 @attr(assertion='does not modify owner')
 @attr('fails_on_aws') #  <Error><Code>InvalidArgument</Code><Message>Invalid id</Message><ArgumentName>CanonicalUser/ID</ArgumentName><ArgumentValue>${ALTUSER}</ArgumentValue>
+@attr('canned_acl')
 def test_object_acl_full_control_verify_owner():
     bucket_name = get_new_bucket_name()
     main_client = get_client()
@@ -5125,6 +5160,7 @@ def add_obj_user_grant(bucket_name, key, grant):
 @attr(method='put')
 @attr(operation='set write-acp')
 @attr(assertion='does not modify other attributes')
+@attr('canned_acl')
 def test_object_acl_full_control_verify_attributes():
     bucket_name = get_new_bucket_name()
     main_client = get_client()
@@ -5157,6 +5193,7 @@ def test_object_acl_full_control_verify_attributes():
 
 @attr(resource='bucket')
 @attr(method='ACLs')
+@attr('canned_acl')
 @attr(operation='set acl private')
 @attr(assertion='a private object can be set to private')
 def test_bucket_acl_canned_private_to_private():
@@ -5423,6 +5460,7 @@ def test_bucket_acl_grant_userid_read():
 
 @attr(resource='bucket')
 @attr(method='ACLs')
+@attr('canned_acl')
 @attr(operation='set acl w/userid READ_ACP')
 @attr(assertion='can read acl, no other r/w')
 @attr('fails_on_aws') #  <Error><Code>InvalidArgument</Code><Message>Invalid id</Message><ArgumentName>CanonicalUser/ID</ArgumentName><ArgumentValue>${ALTUSER}</ArgumentValue>
@@ -5442,6 +5480,7 @@ def test_bucket_acl_grant_userid_readacp():
 
 @attr(resource='bucket')
 @attr(method='ACLs')
+@attr('canned_acl')
 @attr(operation='set acl w/userid WRITE')
 @attr(assertion='can write data, no other r/w')
 @attr('fails_on_aws') #  <Error><Code>InvalidArgument</Code><Message>Invalid id</Message><ArgumentName>CanonicalUser/ID</ArgumentName><ArgumentValue>${ALTUSER}</ArgumentValue>
@@ -5460,6 +5499,7 @@ def test_bucket_acl_grant_userid_write():
 
 @attr(resource='bucket')
 @attr(method='ACLs')
+@attr('canned_acl')
 @attr(operation='set acl w/userid WRITE_ACP')
 @attr(assertion='can write acls, no other r/w')
 @attr('fails_on_aws') #  <Error><Code>InvalidArgument</Code><Message>Invalid id</Message><ArgumentName>CanonicalUser/ID</ArgumentName><ArgumentValue>${ALTUSER}</ArgumentValue>
@@ -5478,6 +5518,7 @@ def test_bucket_acl_grant_userid_writeacp():
 
 @attr(resource='bucket')
 @attr(method='ACLs')
+@attr('canned_acl')
 @attr(operation='set acl w/invalid userid')
 @attr(assertion='fails 400')
 def test_bucket_acl_grant_nonexist_user():
@@ -5498,6 +5539,7 @@ def test_bucket_acl_grant_nonexist_user():
 
 @attr(resource='bucket')
 @attr(method='ACLs')
+@attr('canned_acl')
 @attr(operation='revoke all ACLs')
 @attr(assertion='can: read obj, get/set bucket acl, cannot write objs')
 def test_bucket_acl_no_grants():
@@ -5633,6 +5675,7 @@ def test_object_header_acl_grants():
 @attr('fails_on_dho')
 @attr('fails_on_aws') #  <Error><Code>InvalidArgument</Code><Message>Invalid id</Message><ArgumentName>CanonicalUser/ID</ArgumentName><ArgumentValue>${ALTUSER}</ArgumentValue>
 @attr('fails_on_dbstore')
+@attr('canned_acl')
 def test_bucket_header_acl_grants():
     headers = _get_acl_header()
     bucket_name = get_new_bucket_name()
@@ -5713,6 +5756,7 @@ def test_bucket_header_acl_grants():
 # created without an email.
 @attr(resource='bucket')
 @attr(method='ACLs')
+@attr('canned_acl')
 @attr(operation='add second FULL_CONTROL user')
 @attr(assertion='works for S3, fails for DHO')
 @attr('fails_on_aws') #  <Error><Code>AmbiguousGrantByEmailAddress</Code><Message>The e-mail address you provided is associated with more than one account. Please retry your request using a different identification method or after resolving the ambiguity.</Message>
@@ -5760,6 +5804,7 @@ def test_bucket_acl_grant_email():
 
 @attr(resource='bucket')
 @attr(method='ACLs')
+@attr('canned_acl')
 @attr(operation='add acl for nonexistent user')
 @attr(assertion='fail 400')
 def test_bucket_acl_grant_email_not_exist():
@@ -5783,6 +5828,7 @@ def test_bucket_acl_grant_email_not_exist():
 
 @attr(resource='bucket')
 @attr(method='ACLs')
+@attr('canned_acl')
 @attr(operation='revoke all ACLs')
 @attr(assertion='acls read back as empty')
 def test_bucket_acl_revoke_all():
@@ -5875,6 +5921,7 @@ def list_bucket_versions(client, bucket_name):
 
 @attr(resource='object')
 @attr(method='ACLs')
+@attr('canned_acl')
 @attr(operation='set bucket/object acls: private/private')
 @attr(assertion='public has no access to bucket or objects')
 @attr('fails_on_dbstore')
@@ -5907,6 +5954,7 @@ def test_access_bucket_private_object_private():
 
 @attr(resource='object')
 @attr(method='ACLs')
+@attr('canned_acl')
 @attr(operation='set bucket/object acls: private/private with list-objects-v2')
 @attr(assertion='public has no access to bucket or objects')
 @attr('list-objects-v2')
@@ -5940,6 +5988,7 @@ def test_access_bucket_private_objectv2_private():
 
 @attr(resource='object')
 @attr(method='ACLs')
+@attr('canned_acl')
 @attr(operation='set bucket/object acls: private/public-read')
 @attr(assertion='public can only read readable object')
 @attr('fails_on_dbstore')
@@ -5965,6 +6014,7 @@ def test_access_bucket_private_object_publicread():
 
 @attr(resource='object')
 @attr(method='ACLs')
+@attr('canned_acl')
 @attr(operation='set bucket/object acls: private/public-read with list-objects-v2')
 @attr(assertion='public can only read readable object')
 @attr('list-objects-v2')
@@ -5991,6 +6041,7 @@ def test_access_bucket_private_objectv2_publicread():
 
 @attr(resource='object')
 @attr(method='ACLs')
+@attr('canned_acl')
 @attr(operation='set bucket/object acls: private/public-read/write')
 @attr(assertion='public can only read the readable object')
 @attr('fails_on_dbstore')
@@ -6016,6 +6067,7 @@ def test_access_bucket_private_object_publicreadwrite():
 
 @attr(resource='object')
 @attr(method='ACLs')
+@attr('canned_acl')
 @attr(operation='set bucket/object acls: private/public-read/write with list-objects-v2')
 @attr(assertion='public can only read the readable object')
 @attr('list-objects-v2')
@@ -6042,6 +6094,7 @@ def test_access_bucket_private_objectv2_publicreadwrite():
 
 @attr(resource='object')
 @attr(method='ACLs')
+@attr('canned_acl')
 @attr(operation='set bucket/object acls: public-read/private')
 @attr(assertion='public can only list the bucket')
 @attr('fails_on_dbstore')
@@ -6066,6 +6119,7 @@ def test_access_bucket_publicread_object_private():
 
 @attr(resource='object')
 @attr(method='ACLs')
+@attr('canned_acl')
 @attr(operation='set bucket/object acls: public-read/public-read')
 @attr(assertion='public can read readable objects and list bucket')
 @attr('fails_on_dbstore')
@@ -6095,6 +6149,7 @@ def test_access_bucket_publicread_object_publicread():
 
 @attr(resource='object')
 @attr(method='ACLs')
+@attr('canned_acl')
 @attr(operation='set bucket/object acls: public-read/public-read-write')
 @attr(assertion='public can read readable objects and list bucket')
 @attr('fails_on_dbstore')
@@ -6126,6 +6181,7 @@ def test_access_bucket_publicread_object_publicreadwrite():
 
 @attr(resource='object')
 @attr(method='ACLs')
+@attr('canned_acl')
 @attr(operation='set bucket/object acls: public-read-write/private')
 @attr(assertion='private objects cannot be read, but can be overwritten')
 @attr('fails_on_dbstore')
@@ -6146,6 +6202,7 @@ def test_access_bucket_publicreadwrite_object_private():
 
 @attr(resource='object')
 @attr(method='ACLs')
+@attr('canned_acl')
 @attr(operation='set bucket/object acls: public-read-write/public-read')
 @attr(assertion='private objects cannot be read, but can be overwritten')
 @attr('fails_on_dbstore')
@@ -6169,6 +6226,7 @@ def test_access_bucket_publicreadwrite_object_publicread():
 
 @attr(resource='object')
 @attr(method='ACLs')
+@attr('canned_acl')
 @attr(operation='set bucket/object acls: public-read-write/public-read-write')
 @attr(assertion='private objects cannot be read, but can be overwritten')
 @attr('fails_on_dbstore')
@@ -6357,7 +6415,6 @@ def test_bucket_create_special_key_names():
         response = client.get_object(Bucket=bucket_name, Key=name)
         body = _get_body(response)
         eq(name, body)
-        client.put_object_acl(Bucket=bucket_name, Key=name, ACL='private')
 
 @attr(resource='bucket')
 @attr(method='get')
@@ -6538,6 +6595,7 @@ def test_object_copy_not_owned_object_bucket():
 @attr(operation='copy object and change acl')
 @attr(assertion='works')
 @attr('fails_on_dbstore')
+@attr('canned_acl')
 def test_object_copy_canned_acl():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -7449,6 +7507,7 @@ def test_list_multipart_upload():
 @attr(operation='list multipart uploads with different owners')
 @attr(assertion='successful')
 @attr('fails_on_dbstore')
+@attr('canned_acl')
 def test_list_multipart_upload_owner():
     bucket_name = get_new_bucket()
 
@@ -7578,6 +7637,7 @@ def _simple_http_req_100_cont(host, port, is_secure, method, resource):
 @attr(assertion='succeeds if object is public-read-write')
 @attr('100_continue')
 @attr('fails_on_mod_proxy_fcgi')
+@attr('canned_acl')
 def test_100_continue():
     bucket_name = get_new_bucket_name()
     client = get_client()
@@ -7643,6 +7703,7 @@ def _cors_request_and_check(func, url, headers, expect_status, expect_allow_orig
 @attr(operation='check cors response when origin header set')
 @attr(assertion='returning cors header')
 @attr('cors')
+@attr('canned_acl')
 def test_cors_origin_response():
     bucket_name = _setup_bucket_acl(bucket_acl='public-read')
     client = get_client()
@@ -7723,6 +7784,7 @@ def test_cors_origin_response():
 @attr(operation='check cors response when origin is set to wildcard')
 @attr(assertion='returning cors header')
 @attr('cors')
+@attr('canned_acl')
 def test_cors_origin_wildcard():
     bucket_name = _setup_bucket_acl(bucket_acl='public-read')
     client = get_client()
@@ -7753,6 +7815,7 @@ def test_cors_origin_wildcard():
 @attr(operation='check cors response when Access-Control-Request-Headers is set in option request')
 @attr(assertion='returning cors header')
 @attr('cors')
+@attr('canned_acl')
 def test_cors_header_option():
     bucket_name = _setup_bucket_acl(bucket_acl='public-read')
     client = get_client()
@@ -8986,6 +9049,7 @@ def test_versioning_multi_object_delete_with_marker_create():
 @attr(assertion='works')
 @attr('versioning')
 @attr('fails_on_dbstore')
+@attr('canned_acl')
 def test_versioned_object_acl():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -9059,6 +9123,7 @@ def test_versioned_object_acl():
 @attr(assertion='works')
 @attr('versioning')
 @attr('fails_on_dbstore')
+@attr('canned_acl')
 def test_versioned_object_acl_no_version_specified():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -11605,6 +11670,7 @@ def test_bucketv2_policy():
 @attr(operation='Test Bucket Policy and ACL')
 @attr(assertion='fails')
 @attr('bucket-policy')
+@attr('canned_acl')
 def test_bucket_policy_acl():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -11645,6 +11711,7 @@ def test_bucket_policy_acl():
 @attr(assertion='fails')
 @attr('bucket-policy')
 @attr('list-objects-v2')
+@attr('canned_acl')
 def test_bucketv2_policy_acl():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -12149,6 +12216,7 @@ def test_put_delete_tags():
 @attr('tagging')
 @attr(assertion='succeeds and returns written data')
 @attr('fails_on_dbstore')
+@attr('canned_acl')
 def test_post_object_tags_anonymous_request():
     bucket_name = get_new_bucket_name()
     client = get_client()
@@ -12737,6 +12805,7 @@ def test_bucket_policy_put_obj_copy_source_meta():
 @attr(assertion='success')
 @attr('tagging')
 @attr('bucket-policy')
+@attr('canned_acl')
 def test_bucket_policy_put_obj_acl():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -14203,6 +14272,7 @@ def test_get_bucket_policy_status():
 @attr(operation='get bucket policy status on a public acl bucket')
 @attr(assertion='succeeds')
 @attr('policy_status')
+@attr('canned_acl')
 def test_get_public_acl_bucket_policy_status():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -14374,6 +14444,7 @@ def test_put_public_block():
 @attr(operation='get public access block on a bucket')
 @attr(assertion='succeeds')
 @attr('policy_status')
+@attr('canned_acl')
 def test_block_public_put_bucket_acls():
     #client = get_svc_client(svc='s3control', client_config=Config(s3={'addressing_style': 'path'}))
     bucket_name = get_new_bucket()
@@ -14408,6 +14479,7 @@ def test_block_public_put_bucket_acls():
 @attr(operation='block public acls on canned acls')
 @attr(assertion='succeeds')
 @attr('policy_status')
+@attr('canned_acl')
 def test_block_public_object_canned_acls():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -14465,6 +14537,7 @@ def test_block_public_policy():
 @attr(assertion='succeeds')
 @attr('policy_status')
 @attr('fails_on_dbstore')
+@attr('canned_acl')
 def test_ignore_public_acls():
     bucket_name = get_new_bucket()
     client = get_client()
