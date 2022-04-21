@@ -264,7 +264,10 @@ def test_bucket_listv2_encoding_basic():
 
     prefixes = _get_prefixes(response)
     eq(len(prefixes), 3)
-    eq(prefixes, ['foo%2B1/', 'foo/', 'quux%20ab/'])
+    # eq(prefixes, ['foo%2B1/', 'foo/', 'quux%20ab/'])
+    eq(prefixes[0], 'foo%2B1/')
+    eq(prefixes[1], 'foo/')
+    ok(prefixes[2] in ['quux%20ab/', 'quux+ab/'])
 
 @attr(resource='bucket')
 @attr(method='get')
@@ -283,7 +286,9 @@ def test_bucket_list_encoding_basic():
 
     prefixes = _get_prefixes(response)
     eq(len(prefixes), 3)
-    eq(prefixes, ['foo%2B1/', 'foo/', 'quux%20ab/'])
+    eq(prefixes[0], 'foo%2B1/')
+    eq(prefixes[1], 'foo/')
+    ok(prefixes[2] in ['quux%20ab/', 'quux+ab/'])
 
 
 def validate_bucket_list(bucket_name, prefix, delimiter, marker, max_keys,
@@ -900,7 +905,7 @@ def test_bucket_list_prefix_empty():
     client = get_client()
 
     response = client.list_objects(Bucket=bucket_name, Prefix='')
-    eq(response['Prefix'], '')
+    eq(response.get('Prefix',''), '')
 
     keys = _get_keys(response)
     prefixes = _get_prefixes(response)
@@ -918,7 +923,7 @@ def test_bucket_listv2_prefix_empty():
     client = get_client()
 
     response = client.list_objects_v2(Bucket=bucket_name, Prefix='')
-    eq(response['Prefix'], '')
+    eq(response.get('Prefix',''), '')
 
     keys = _get_keys(response)
     prefixes = _get_prefixes(response)
@@ -935,7 +940,7 @@ def test_bucket_list_prefix_none():
     client = get_client()
 
     response = client.list_objects(Bucket=bucket_name, Prefix='')
-    eq(response['Prefix'], '')
+    eq(response.get('Prefix',''), '')
 
     keys = _get_keys(response)
     prefixes = _get_prefixes(response)
@@ -953,7 +958,7 @@ def test_bucket_listv2_prefix_none():
     client = get_client()
 
     response = client.list_objects_v2(Bucket=bucket_name, Prefix='')
-    eq(response['Prefix'], '')
+    eq(response.get('Prefix', ''), '')
 
     keys = _get_keys(response)
     prefixes = _get_prefixes(response)
@@ -1008,7 +1013,7 @@ def test_bucket_list_prefix_unreadable():
     client = get_client()
 
     response = client.list_objects(Bucket=bucket_name, Prefix='\x0a')
-    eq(response['Prefix'], '\x0a')
+    eq(response['Prefix'], '%0A')
 
     keys = _get_keys(response)
     prefixes = _get_prefixes(response)
