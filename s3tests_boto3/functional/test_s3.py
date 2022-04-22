@@ -6287,8 +6287,9 @@ def test_buckets_list_ctime():
         client.create_bucket(Bucket=get_new_bucket_name())
 
     response = client.list_buckets()
-    for bucket in response['Buckets']:
-        ctime = bucket['CreationDate']
+    ctimes = [bucket['CreationDate'] for bucket in response['Buckets'] if bucket['Name'].startswith(get_prefix()) ]
+    assert len(ctimes) >= 5
+    for ctime in ctimes:
         assert before <= ctime, '%r > %r' % (before, ctime)
 
 @attr(resource='bucket')
