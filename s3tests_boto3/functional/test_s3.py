@@ -4205,7 +4205,7 @@ def check_invalid_bucketname(invalid_name):
         new_url = url.replace(valid_bucket_name, invalid_name)
         kwargs['params']['url'] = new_url
     client.meta.events.register('before-call.s3.CreateBucket', replace_bucketname_from_url)
-    e = assert_raises(ClientError, client.create_bucket, Bucket=invalid_name)
+    e = assert_raises(ClientError, client.create_bucket, Bucket=valid_bucket_name)
     status, error_code = _get_status_and_error_code(e.response)
     return (status, error_code)
 
