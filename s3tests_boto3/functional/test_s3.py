@@ -7044,7 +7044,7 @@ def test_multipart_copy_invalid_range():
     valid_status = [400, 416]
     if not status in valid_status:
        raise AssertionError("Invalid response " + str(status))
-    eq(error_code, 'InvalidRange')
+    eq(error_code, 'InvalidArgument')
 
 
 @attr(resource='object')
