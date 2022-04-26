@@ -14228,16 +14228,14 @@ def test_copy_object_ifnonematch_failed():
 @attr(resource='object')
 @attr(method='get')
 @attr(operation='read to invalid key')
-@attr(assertion='fails 400')
-# TODO: results in a 404 instead of 400 on the RGW
-@attr('fails_on_rgw')
+@attr(assertion='fails 404')
 def test_object_read_unreadable():
     bucket_name = get_new_bucket()
     client = get_client()
     e = assert_raises(ClientError, client.get_object, Bucket=bucket_name, Key='\xae\x8a-')
     status, error_code = _get_status_and_error_code(e.response)
-    eq(status, 400)
-    eq(e.response['Error']['Message'], 'Couldn\'t parse the specified URI.')
+    eq(status, 404)
+    eq(error_code, 'NoSuchKey')
 
 @attr(resource='bucket')
 @attr(method='get')
