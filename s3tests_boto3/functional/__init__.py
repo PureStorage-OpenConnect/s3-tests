@@ -53,7 +53,7 @@ def get_buckets_list(client=None, prefix=None):
     if prefix == None:
         prefix = get_prefix()
     response = client.list_buckets()
-    bucket_dicts = response['Buckets']
+    bucket_dicts = response.get('Buckets', {})
     buckets_list = []
     for bucket in bucket_dicts:
         if prefix in bucket['Name']:

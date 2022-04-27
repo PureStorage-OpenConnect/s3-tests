@@ -6264,10 +6264,6 @@ def test_buckets_create_then_list():
     for name in bucket_names:
         client.create_bucket(Bucket=name)
 
-    response = client.list_buckets()
-    bucket_dicts = response['Buckets']
-    buckets_list = []
-
     buckets_list = get_buckets_list()
 
     for name in bucket_names:
@@ -6304,8 +6300,8 @@ def test_list_buckets_anonymous():
     # While it may have been possible to use httplib directly, doing it this way takes care of also
     # allowing us to vary the calling format in testing.
     unauthenticated_client = get_unauthenticated_client()
-    response = unauthenticated_client.list_buckets()
-    eq(len(response['Buckets']), 0)
+    buckets = get_buckets_list(client=unauthenticated_client, prefix='')
+    eq(len(buckets), 0)
 
 @attr(resource='bucket')
 @attr(method='get')
