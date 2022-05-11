@@ -8263,6 +8263,7 @@ class ActionOnCount:
 @attr(method='put')
 @attr(operation='multipart check for two writes of the same part, first write finishes last')
 @attr(assertion='object contains correct content')
+@attr('fails_on_aws') # AWS raises InvalidPartOrder
 def test_multipart_resend_first_finishes_last():
     bucket_name = get_new_bucket()
     client = get_client()
