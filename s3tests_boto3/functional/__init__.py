@@ -85,11 +85,15 @@ def list_versions(client, bucket, batch_size):
     version_marker = ''
     truncated = True
     while truncated:
+        kwargs = {}
+        if key_marker != '':
+            kwargs['KeyMarker'] = key_marker
+            kwargs['VersionIdMarker'] = version_marker
+
         listing = client.list_object_versions(
-                Bucket=bucket,
-                KeyMarker=key_marker,
-                VersionIdMarker=version_marker,
-                MaxKeys=batch_size)
+            Bucket=bucket,
+            MaxKeys=batch_size,
+            **kwargs)
 
         key_marker = listing.get('NextKeyMarker')
         version_marker = listing.get('NextVersionIdMarker')
@@ -99,7 +103,7 @@ def list_versions(client, bucket, batch_size):
         if len(objs):
             yield [{'Key': o['Key'], 'VersionId': o['VersionId']} for o in objs]
 
-def nuke_bucket(client, bucket):
+def nuke_bucket(client, bucket, **kwargs):
     batch_size = 128
     max_retain_date = None
 
@@ -107,7 +111,7 @@ def nuke_bucket(client, bucket):
     for objects in list_versions(client, bucket, batch_size):
         delete = client.delete_objects(Bucket=bucket,
                 Delete={'Objects': objects, 'Quiet': True},
-                BypassGovernanceRetention=True)
+                **kwargs)
 
         # check for object locks on 403 AccessDenied errors
         for err in delete.get('Errors', []):
@@ -138,7 +142,7 @@ bucket cleanup'.format(bucket, delta.total_seconds()))
         for objects in list_versions(client, bucket, batch_size):
             client.delete_objects(Bucket=bucket,
                     Delete={'Objects': objects, 'Quiet': True},
-                    BypassGovernanceRetention=True)
+                    **kwargs)
 
     client.delete_bucket(Bucket=bucket)
 
@@ -151,6 +155,15 @@ def nuke_prefixed_buckets(prefix, client=None):
     err = None
     for bucket_name in buckets:
         try:
+            kwargs = {}
+            try:
+                response = client.get_object_lock_configuration(Bucket=bucket_name)
+                if response['ObjectLockConfiguration']['ObjectLockEnabled'] == 'Enabled':
+                    kwargs['BypassGovernanceRetention'] = True
+            except:
+                print('Failed to fetch object log configuration')
+                pass
+
             nuke_bucket(client, bucket_name)
         except Exception as e:
             # The exception shouldn't be raised when doing cleanup. Pass and continue
@@ -203,17 +216,17 @@ def setup():
     defaults = cfg.defaults()
 
     # vars from the DEFAULT section
-    config.default_host = defaults.get("host")
-    config.default_port = int(defaults.get("port"))
-    config.default_is_secure = cfg.getboolean('DEFAULT', "is_secure")
+    config.default_host = defaults.get("host", fallback=None)
+    config.default_port = defaults.getint('port', fallback=None)
+    config.default_is_secure = defaults.getboolean("is_secure", fallback=None)
 
-    proto = 'https' if config.default_is_secure else 'http'
-    config.default_endpoint = "%s://%s:%d" % (proto, config.default_host, config.default_port)
+    if config.default_host:
+        proto = 'https' if config.default_is_secure else 'http'
+        config.default_endpoint = "%s://%s:%d" % (proto, config.default_host, config.default_port)
+    else:
+        config.default_endpoint = None
 
-    try:
-        config.default_ssl_verify = cfg.getboolean('DEFAULT', "ssl_verify")
-    except configparser.NoOptionError:
-        config.default_ssl_verify = False
+    config.default_ssl_verify = defaults.getboolean("ssl_verify", fallback = False)
 
     # Disable InsecureRequestWarning reported by urllib3 when ssl_verify is False
     if not config.default_ssl_verify:

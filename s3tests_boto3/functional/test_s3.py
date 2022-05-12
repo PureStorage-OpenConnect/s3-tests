@@ -1742,7 +1742,7 @@ def test_bucket_list_return_data():
     for obj in objs_list:
         key_name = obj['Key']
         key_data = data[key_name]
-        eq(obj['ETag'],key_data['ETag'])
+        eq(obj['ETag'],key_data['ETag'].replace('"',''))
         eq(obj['Size'],key_data['ContentLength'])
         eq(obj['Owner']['DisplayName'],key_data['DisplayName'])
         eq(obj['Owner']['ID'],key_data['ID'])
