@@ -9106,6 +9106,7 @@ def test_versioned_concurrent_object_create_and_remove():
 @attr(method='put')
 @attr(operation='set lifecycle config')
 @attr('lifecycle')
+@attr('deprecated_field_prefix')
 def test_lifecycle_set():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -9119,6 +9120,7 @@ def test_lifecycle_set():
 @attr(method='get')
 @attr(operation='get lifecycle config')
 @attr('lifecycle')
+@attr('deprecated_field_prefix')
 def test_lifecycle_get():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -9133,6 +9135,7 @@ def test_lifecycle_get():
 @attr(method='get')
 @attr(operation='get lifecycle config no id')
 @attr('lifecycle')
+@attr('deprecated_field_prefix')
 def test_lifecycle_get_no_id():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -9169,6 +9172,7 @@ def test_lifecycle_get_no_id():
 @attr('lifecycle')
 @attr('lifecycle_expiration')
 @attr('fails_on_aws')
+@attr('deprecated_field_prefix')
 def test_lifecycle_expiration():
     bucket_name = _create_objects(keys=['expire1/foo', 'expire1/bar', 'keep2/foo',
                                         'keep2/bar', 'expire3/foo', 'expire3/bar'])
@@ -9206,6 +9210,7 @@ def test_lifecycle_expiration():
 @attr('lifecycle_expiration')
 @attr('fails_on_aws')
 @attr('list-objects-v2')
+@attr('deprecated_field_prefix')
 def test_lifecyclev2_expiration():
     bucket_name = _create_objects(keys=['expire1/foo', 'expire1/bar', 'keep2/foo',
                                         'keep2/bar', 'expire3/foo', 'expire3/bar'])
@@ -9242,6 +9247,7 @@ def test_lifecyclev2_expiration():
 @attr('lifecycle')
 @attr('lifecycle_expiration')
 @attr('fails_on_aws')
+@attr('deprecated_field_prefix')
 def test_lifecycle_expiration_versioning_enabled():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -9501,6 +9507,7 @@ def test_lifecycle_expiration_noncur_tags1():
 @attr(operation='id too long in lifecycle rule')
 @attr('lifecycle')
 @attr(assertion='fails 400')
+@attr('deprecated_field_prefix')
 def test_lifecycle_id_too_long():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -9517,6 +9524,7 @@ def test_lifecycle_id_too_long():
 @attr(operation='same id')
 @attr('lifecycle')
 @attr(assertion='fails 400')
+@attr('deprecated_field_prefix')
 def test_lifecycle_same_id():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -9565,6 +9573,7 @@ def test_lifecycle_invalid_status():
 @attr(method='put')
 @attr(operation='set lifecycle config with expiration date')
 @attr('lifecycle')
+@attr('deprecated_field_prefix')
 def test_lifecycle_set_date():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -9813,6 +9822,7 @@ def test_lifecycle_expiration_header_and_tags_head():
 @attr(method='put')
 @attr(operation='set lifecycle config with noncurrent version expiration')
 @attr('lifecycle')
+@attr('deprecated_field_prefix')
 def test_lifecycle_set_noncurrent():
     bucket_name = _create_objects(keys=['past/foo', 'future/bar'])
     client = get_client()
