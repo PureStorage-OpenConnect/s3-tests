@@ -216,9 +216,12 @@ def setup():
     defaults = cfg.defaults()
 
     # vars from the DEFAULT section
-    config.default_host = defaults.get("host", fallback=None)
-    config.default_port = defaults.getint('port', fallback=None)
-    config.default_is_secure = defaults.getboolean("is_secure", fallback=None)
+    config.default_host = defaults.get("host")
+    config.default_port = defaults.get("port")
+    if config.default_port is not None:
+        config.default_port = int(config.default_port)
+
+    config.default_is_secure = cfg.getboolean('DEFAULT', "is_secure")
 
     if config.default_host:
         proto = 'https' if config.default_is_secure else 'http'
@@ -226,7 +229,10 @@ def setup():
     else:
         config.default_endpoint = None
 
-    config.default_ssl_verify = defaults.getboolean("ssl_verify", fallback = False)
+    try:
+        config.default_ssl_verify = cfg.getboolean('DEFAULT', "ssl_verify")
+    except configparser.NoOptionError:
+        config.default_ssl_verify = False
 
     # Disable InsecureRequestWarning reported by urllib3 when ssl_verify is False
     if not config.default_ssl_verify:
