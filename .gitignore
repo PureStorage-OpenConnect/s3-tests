@@ -12,3 +12,5 @@
 /virtualenv
 
 config.yaml
+**/*.log
+**/.noseids
