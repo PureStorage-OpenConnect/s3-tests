@@ -1438,6 +1438,21 @@ def test_bucket_list_unordered():
     intersect = set(unordered_keys_out).intersection(unordered_keys_out2)
     eq(0, len(intersect))
 
+@attr(resource='bucket')
+@attr(method='get')
+@attr(operation='list all keys with list-objects-v2, using delimiter')
+@attr(assertion='bucket list unordered fails')
+@attr('fails_on_aws') # allow-unordered is a non-standard extension
+@attr('fails_on_dbstore')
+def test_bucket_list_unordered_delimiter():
+    keys_in = ['ado', 'bot', 'cob', 'dog', 'emu', 'fez', 'gnu', 'hex',
+               'abc/ink', 'abc/jet', 'abc/kin', 'abc/lax', 'abc/mux',
+               'def/nim', 'def/owl', 'def/pie', 'def/qed', 'def/rye',
+               'ghi/sew', 'ghi/tor', 'ghi/uke', 'ghi/via', 'ghi/wit',
+               'xix', 'yak', 'zoo']
+    bucket_name = _create_objects(keys=keys_in)
+    client = get_client()
+    
     # verify that unordered used with delimiter results in error
     e = assert_raises(ClientError,
                       client.list_objects, Bucket=bucket_name, Delimiter="/")
@@ -1496,6 +1511,22 @@ def test_bucket_listv2_unordered():
     intersect = set(unordered_keys_out).intersection(unordered_keys_out2)
     eq(0, len(intersect))
 
+@attr(resource='bucket')
+@attr(method='get')
+@attr(operation='list all keys with list-objects-v2, using delimiter')
+@attr(assertion='bucket list unordered fails')
+@attr('fails_on_aws') # allow-unordered is a non-standard extension
+@attr('list-objects-v2')
+@attr('fails_on_dbstore')
+def test_bucket_listv2_unordered_delimiter():
+    keys_in = ['ado', 'bot', 'cob', 'dog', 'emu', 'fez', 'gnu', 'hex',
+               'abc/ink', 'abc/jet', 'abc/kin', 'abc/lax', 'abc/mux',
+               'def/nim', 'def/owl', 'def/pie', 'def/qed', 'def/rye',
+               'ghi/sew', 'ghi/tor', 'ghi/uke', 'ghi/via', 'ghi/wit',
+               'xix', 'yak', 'zoo']
+    bucket_name = _create_objects(keys=keys_in)
+    client = get_client()
+    
     # verify that unordered used with delimiter results in error
     e = assert_raises(ClientError,
                       client.list_objects, Bucket=bucket_name, Delimiter="/")
