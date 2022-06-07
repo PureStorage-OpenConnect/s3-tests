@@ -28,6 +28,7 @@ import random
 import socket
 import dateutil.parser
 import ssl
+from functools import partial
 from collections import namedtuple
 from collections import defaultdict
 from io import StringIO
@@ -14950,3 +14951,78 @@ def test_sse_s3_encrypted_upload_1mb():
 @attr('fails_on_dbstore')
 def test_sse_s3_encrypted_upload_8mb():
     _test_sse_s3_encrypted_upload(8*1024*1024)
+
+def test_get_api_defaults():
+    bucket_name = get_new_bucket()
+    client = get_client()
+
+    def resp_checker(template_response):
+        return lambda response: response == template_response
+
+    check_is_trucated =  resp_checker({'IsTruncated': False})
+    check_empty = lambda response: response == {}
+    check_non_empty = lambda response: len(response) > 0
+
+    test = partial(_test, client, Bucket=bucket_name)
+    yield test, 'get_bucket_accelerate_configuration', 200, None, check_empty
+    yield test, 'get_bucket_acl', 200, None, check_non_empty
+    yield test, 'get_bucket_cors', 404, 'NoSuchCORSConfiguration'
+    yield test, 'get_bucket_encryption', 404, 'ServerSideEncryptionConfigurationNotFoundError'
+    yield test, 'get_bucket_lifecycle', 404, 'NoSuchLifecycleConfiguration'
+    yield test, 'get_bucket_lifecycle_configuration', 404, 'NoSuchLifecycleConfiguration'
+    yield test, 'get_bucket_location', 200, None, resp_checker({'LocationConstraint': None})
+    yield test, 'get_bucket_logging', 200, None, check_empty
+    yield test, 'get_bucket_notification', 200, None, check_empty
+    yield test, 'get_bucket_notification_configuration', 200, None, check_empty
+    yield test, 'get_bucket_ownership_controls', 404, 'OwnershipControlsNotFoundError'
+    yield test, 'get_bucket_policy', 404, 'NoSuchBucketPolicy'
+    yield test, 'get_bucket_policy_status', 404, 'NoSuchBucketPolicy'
+    yield test, 'get_bucket_replication', 404, 'ReplicationConfigurationNotFoundError'
+    yield test, 'get_bucket_request_payment', 200, None, resp_checker({'Payer': 'BucketOwner'})
+    yield test, 'get_bucket_tagging', 404, 'NoSuchTagSet'
+    yield test, 'get_bucket_versioning', 200, None, check_empty
+    yield test, 'get_bucket_website', 404, 'NoSuchWebsiteConfiguration'
+    yield test, 'get_object_lock_configuration', 404, 'ObjectLockConfigurationNotFoundError'
+    yield test, 'get_public_access_block', 404, 'NoSuchPublicAccessBlockConfiguration'
+    yield test, 'list_bucket_analytics_configurations', 200, None, check_is_trucated
+    yield test, 'list_bucket_intelligent_tiering_configurations', 200, None, check_is_trucated
+    yield test, 'list_bucket_inventory_configurations', 200, None, check_is_trucated
+    yield test, 'list_bucket_metrics_configurations', 200, None, check_is_trucated
+    yield test, 'list_multipart_uploads', 200, None, check_non_empty
+    yield test, 'list_objects', 200, None, check_non_empty
+    yield test, 'list_objects_v2', 200, None, check_non_empty
+    yield test, 'list_object_versions', 200, None, check_non_empty
+
+    test_id = partial(test, Id='1')
+    yield test_id, 'get_bucket_analytics_configuration', 404, 'NoSuchConfiguration'
+    yield test_id, 'get_bucket_intelligent_tiering_configuration', 404, 'NoSuchConfiguration'
+    yield test_id, 'get_bucket_inventory_configuration', 404, 'NoSuchConfiguration'
+    yield test_id, 'get_bucket_metrics_configuration', 404, 'NoSuchConfiguration'
+
+    key = 'foo'
+    client.put_object(Bucket=bucket_name, Key=key)
+    test_key = partial(test, Key=key)
+    yield test_key, 'get_object', 200, None, check_non_empty
+    yield test_key, 'get_object_acl', 200, None, check_non_empty
+    yield partial(test_key, ObjectAttributes=[]), 'get_object_attributes', 400, 'InvalidRequest'
+    yield partial(test_key, ObjectAttributes=['ETag', 'Checksum', 'ObjectParts', 'StorageClass', 'ObjectSize']), 'get_object_attributes', 200, None, check_non_empty
+    yield test_key, 'get_object_legal_hold', 400, 'InvalidRequest'
+    yield test_key, 'get_object_retention', 400, 'InvalidRequest'
+    yield test_key, 'get_object_tagging', 200, None, resp_checker({'TagSet': []})
+    # NOTE: get_object_torrent is not applicable
+    yield partial(test_key, UploadId='1'), 'list_parts', 404, 'NoSuchUpload'
+
+def _test(client, command, expected_status_code, expected_error_code=None, check_fnc = None, **kwargs):
+    fnc = getattr(client, command)
+
+    if expected_status_code != 200:
+        e = assert_raises(ClientError, fnc, **kwargs)
+        status_code, error_code = _get_status_and_error_code(e.response)
+        eq(status_code, expected_status_code)
+        if expected_error_code:
+            eq(error_code, expected_error_code)
+    else:
+        response = fnc(**kwargs)
+        del response['ResponseMetadata']
+        if check_fnc:
+            ok(check_fnc(response))
