@@ -1345,51 +1345,6 @@ def parseXmlToJson(xml):
 
 @attr(resource='bucket')
 @attr(method='get')
-@attr(operation='get usage by client')
-@attr(assertion='account usage api')
-@attr('fails_on_aws') # allow-unordered is a non-standard extension
-def test_account_usage():
-    # boto3.set_stream_logger(name='botocore')
-    client = get_client()
-    # adds the unordered query parameter
-    def add_usage(**kwargs):
-        kwargs['params']['url'] += "?usage"
-    client.meta.events.register('before-call.s3.ListBuckets', add_usage)
-    client.meta.events.register('after-call.s3.ListBuckets', get_http_response_body)
-    client.list_buckets()
-    xml    = ET.fromstring(http_response_body.decode('utf-8'))
-    parsed = parseXmlToJson(xml)
-    summary = parsed['Summary']
-    eq(summary['QuotaMaxBytes'], '-1')
-    eq(summary['QuotaMaxBuckets'], '1000')
-    eq(summary['QuotaMaxObjCount'], '-1')
-    eq(summary['QuotaMaxBytesPerBucket'], '-1')
-    eq(summary['QuotaMaxObjCountPerBucket'], '-1')
-
-@attr(resource='bucket')
-@attr(method='head')
-@attr(operation='get usage by client')
-@attr(assertion='account usage by head bucket')
-@attr('fails_on_aws') # allow-unordered is a non-standard extension
-@attr('fails_on_dbstore')
-def test_head_bucket_usage():
-    # boto3.set_stream_logger(name='botocore')
-    client = get_client()
-    bucket_name = _create_objects(keys=['foo'])
-    # adds the unordered query parameter
-    client.meta.events.register('after-call.s3.HeadBucket', get_http_response)
-    client.head_bucket(Bucket=bucket_name)
-    hdrs = http_response['headers']
-    eq(hdrs['X-RGW-Object-Count'], '1')
-    eq(hdrs['X-RGW-Bytes-Used'], '3')
-    eq(hdrs['X-RGW-Quota-User-Size'], '-1')
-    eq(hdrs['X-RGW-Quota-User-Objects'], '-1')
-    eq(hdrs['X-RGW-Quota-Max-Buckets'], '1000')
-    eq(hdrs['X-RGW-Quota-Bucket-Size'], '-1')
-    eq(hdrs['X-RGW-Quota-Bucket-Objects'], '-1')
-
-@attr(resource='bucket')
-@attr(method='get')
 @attr(operation='list all keys')
 @attr(assertion='bucket list unordered')
 @attr('fails_on_aws') # allow-unordered is a non-standard extension
@@ -7011,8 +6966,7 @@ def test_multipart_copy_invalid_range():
     valid_status = [400, 416]
     if not status in valid_status:
        raise AssertionError("Invalid response " + str(status))
-    eq(error_code, 'InvalidArgument')
-
+    ok(error_code in ['InvalidArgument', 'InvalidRequest'])
 
 @attr(resource='object')
 @attr(method='put')
@@ -7044,8 +6998,8 @@ def test_multipart_copy_improper_range():
                           CopySourceRange=test_range,
                           PartNumber=1)
         status, error_code = _get_status_and_error_code(e.response)
-        eq(status, 400)
-        eq(error_code, 'InvalidArgument')
+        ok(status in [400, 416])
+        ok(error_code in ['InvalidArgument', 'InvalidRequest', 'InvalidRange'])
 
 
 @attr(resource='object')
@@ -8117,57 +8071,6 @@ def _test_atomic_conditional_write(file_size):
 
 @attr(resource='object')
 @attr(method='put')
-@attr(operation='write atomicity')
-@attr(assertion='1MB successful')
-@attr('fails_on_aws')
-def test_atomic_conditional_write_1mb():
-    _test_atomic_conditional_write(1024*1024)
-
-def _test_atomic_dual_conditional_write(file_size):
-    """
-    create an object, two sessions writing different contents
-    confirm that it is all one or the other
-    """
-    bucket_name = get_new_bucket()
-    objname = 'testobj'
-    client = get_client()
-
-    fp_a = FakeWriteFile(file_size, 'A')
-    response = client.put_object(Bucket=bucket_name, Key=objname, Body=fp_a)
-    _verify_atomic_key_data(bucket_name, objname, file_size, 'A')
-    etag_fp_a = response['ETag'].replace('"', '')
-
-    # write <file_size> file of C's
-    # but before we're done, try to write all B's
-    fp_b = FakeWriteFile(file_size, 'B')
-    lf = (lambda **kwargs: kwargs['params']['headers'].update({'If-Match': etag_fp_a}))
-    client.meta.events.register('before-call.s3.PutObject', lf)
-    def rewind_put_fp_b():
-        fp_b.seek(0)
-        client.put_object(Bucket=bucket_name, Key=objname, Body=fp_b)
-
-    fp_c = FakeWriteFile(file_size, 'C', rewind_put_fp_b)
-
-    e = assert_raises(ClientError, client.put_object, Bucket=bucket_name, Key=objname, Body=fp_c)
-    status, error_code = _get_status_and_error_code(e.response)
-    eq(status, 412)
-    eq(error_code, 'PreconditionFailed')
-
-    # verify the file
-    _verify_atomic_key_data(bucket_name, objname, file_size, 'B')
-
-@attr(resource='object')
-@attr(method='put')
-@attr(operation='write one or the other')
-@attr(assertion='1MB successful')
-@attr('fails_on_aws')
-# TODO: test not passing with SSL, fix this
-@attr('fails_on_rgw')
-def test_atomic_dual_conditional_write_1mb():
-    _test_atomic_dual_conditional_write(1024*1024)
-
-@attr(resource='object')
-@attr(method='put')
 @attr(operation='write file in deleted bucket')
 @attr(assertion='fail 404')
 @attr('fails_on_aws')
@@ -8229,67 +8132,6 @@ class ActionOnCount:
 
         if self.count == self.trigger_count:
             self.result = self.action()
-
-@attr(resource='object')
-@attr(method='put')
-@attr(operation='multipart check for two writes of the same part, first write finishes last')
-@attr(assertion='object contains correct content')
-@attr('fails_on_aws') # AWS raises InvalidPartOrder
-def test_multipart_resend_first_finishes_last():
-    bucket_name = get_new_bucket()
-    client = get_client()
-    key_name = "mymultipart"
-
-    response = client.create_multipart_upload(Bucket=bucket_name, Key=key_name)
-    upload_id = response['UploadId']
-
-    #file_size = 8*1024*1024
-    file_size = 8
-
-    counter = Counter(0)
-    # upload_part might read multiple times from the object
-    # first time when it calculates md5, second time when it writes data
-    # out. We want to interject only on the last time, but we can't be
-    # sure how many times it's going to read, so let's have a test run
-    # and count the number of reads
-
-    fp_dry_run = FakeWriteFile(file_size, 'C',
-        lambda: counter.inc()
-        )
-
-    parts = []
-
-    response = client.upload_part(UploadId=upload_id, Bucket=bucket_name, Key=key_name, PartNumber=1, Body=fp_dry_run)
-
-    parts.append({'ETag': response['ETag'].strip('"'), 'PartNumber': 1})
-    client.complete_multipart_upload(Bucket=bucket_name, Key=key_name, UploadId=upload_id, MultipartUpload={'Parts': parts})
-
-    client.delete_object(Bucket=bucket_name, Key=key_name)
-
-    # clear parts
-    parts[:] = []
-
-    # ok, now for the actual test
-    fp_b = FakeWriteFile(file_size, 'B')
-    def upload_fp_b():
-        response = client.upload_part(UploadId=upload_id, Bucket=bucket_name, Key=key_name, Body=fp_b, PartNumber=1)
-        parts.append({'ETag': response['ETag'].strip('"'), 'PartNumber': 1})
-
-    action = ActionOnCount(counter.val, lambda: upload_fp_b())
-
-    response = client.create_multipart_upload(Bucket=bucket_name, Key=key_name)
-    upload_id = response['UploadId']
-
-    fp_a = FakeWriteFile(file_size, 'A',
-        lambda: action.trigger()
-        )
-
-    response = client.upload_part(UploadId=upload_id, Bucket=bucket_name, Key=key_name, PartNumber=1, Body=fp_a)
-
-    parts.append({'ETag': response['ETag'].strip('"'), 'PartNumber': 1})
-    client.complete_multipart_upload(Bucket=bucket_name, Key=key_name, UploadId=upload_id, MultipartUpload={'Parts': parts})
-
-    _verify_atomic_key_data(bucket_name, key_name, file_size, 'A')
 
 @attr(resource='object')
 @attr(method='get')
