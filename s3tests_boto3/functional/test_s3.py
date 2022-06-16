@@ -1440,28 +1440,6 @@ def test_bucket_list_unordered():
 
 @attr(resource='bucket')
 @attr(method='get')
-@attr(operation='list all keys with list-objects-v2, using delimiter')
-@attr(assertion='bucket list unordered fails')
-@attr('fails_on_aws') # allow-unordered is a non-standard extension
-@attr('fails_on_dbstore')
-def test_bucket_list_unordered_delimiter():
-    keys_in = ['ado', 'bot', 'cob', 'dog', 'emu', 'fez', 'gnu', 'hex',
-               'abc/ink', 'abc/jet', 'abc/kin', 'abc/lax', 'abc/mux',
-               'def/nim', 'def/owl', 'def/pie', 'def/qed', 'def/rye',
-               'ghi/sew', 'ghi/tor', 'ghi/uke', 'ghi/via', 'ghi/wit',
-               'xix', 'yak', 'zoo']
-    bucket_name = _create_objects(keys=keys_in)
-    client = get_client()
-    
-    # verify that unordered used with delimiter results in error
-    e = assert_raises(ClientError,
-                      client.list_objects, Bucket=bucket_name, Delimiter="/")
-    status, error_code = _get_status_and_error_code(e.response)
-    eq(status, 400)
-    eq(error_code, 'InvalidArgument')
-
-@attr(resource='bucket')
-@attr(method='get')
 @attr(operation='list all keys with list-objects-v2')
 @attr(assertion='bucket list unordered')
 @attr('fails_on_aws') # allow-unordered is a non-standard extension
@@ -1510,30 +1488,6 @@ def test_bucket_listv2_unordered():
     # make sure there's no overlap between the incremental retrievals
     intersect = set(unordered_keys_out).intersection(unordered_keys_out2)
     eq(0, len(intersect))
-
-@attr(resource='bucket')
-@attr(method='get')
-@attr(operation='list all keys with list-objects-v2, using delimiter')
-@attr(assertion='bucket list unordered fails')
-@attr('fails_on_aws') # allow-unordered is a non-standard extension
-@attr('list-objects-v2')
-@attr('fails_on_dbstore')
-def test_bucket_listv2_unordered_delimiter():
-    keys_in = ['ado', 'bot', 'cob', 'dog', 'emu', 'fez', 'gnu', 'hex',
-               'abc/ink', 'abc/jet', 'abc/kin', 'abc/lax', 'abc/mux',
-               'def/nim', 'def/owl', 'def/pie', 'def/qed', 'def/rye',
-               'ghi/sew', 'ghi/tor', 'ghi/uke', 'ghi/via', 'ghi/wit',
-               'xix', 'yak', 'zoo']
-    bucket_name = _create_objects(keys=keys_in)
-    client = get_client()
-    
-    # verify that unordered used with delimiter results in error
-    e = assert_raises(ClientError,
-                      client.list_objects, Bucket=bucket_name, Delimiter="/")
-    status, error_code = _get_status_and_error_code(e.response)
-    eq(status, 400)
-    eq(error_code, 'InvalidArgument')
-
 
 @attr(resource='bucket')
 @attr(method='get')
@@ -1787,10 +1741,11 @@ def test_bucket_list_return_data():
 @attr('versioning')
 @attr('fails_on_dbstore')
 def test_bucket_list_return_data_versioning():
-    bucket_name = get_new_bucket()
+    bucket_name = get_new_bucket_name()
+    bucket = get_new_bucket_resource(bucket_name)
     check_configure_versioning_retry(bucket_name, "Enabled", "Enabled")
     key_names = ['bar', 'baz', 'foo']
-    bucket_name = _create_objects(bucket_name=bucket_name,keys=key_names)
+    _create_objects(bucketp=bucket, bucket_name=bucket_name, keys=key_names)
 
     client = get_client()
     data = {}
@@ -1816,7 +1771,7 @@ def test_bucket_list_return_data_versioning():
         key_name = obj['Key']
         key_data = data[key_name]
         eq(obj['Owner']['DisplayName'],key_data['DisplayName'])
-        eq(obj['ETag'],key_data['ETag'])
+        eq(obj['ETag'].replace('"', ''),key_data['ETag'].replace('"', ''))
         eq(obj['Size'],key_data['ContentLength'])
         eq(obj['Owner']['ID'],key_data['ID'])
         eq(obj['VersionId'], key_data['VersionId'])
@@ -6318,21 +6273,6 @@ def test_buckets_list_ctime():
     assert len(ctimes) >= 5
     for ctime in ctimes:
         assert before <= ctime, '%r > %r' % (before, ctime)
-
-@attr(resource='bucket')
-@attr(method='get')
-@attr(operation='list all buckets (anonymous)')
-@attr(assertion='succeeds')
-@attr('fails_on_aws')
-def test_list_buckets_anonymous():
-    # Get a connection with bad authorization, then change it to be our new Anonymous auth mechanism,
-    # emulating standard HTTP access.
-    #
-    # While it may have been possible to use httplib directly, doing it this way takes care of also
-    # allowing us to vary the calling format in testing.
-    unauthenticated_client = get_unauthenticated_client()
-    buckets = get_buckets_list(client=unauthenticated_client, prefix='')
-    eq(len(buckets), 0)
 
 @attr(resource='bucket')
 @attr(method='get')
