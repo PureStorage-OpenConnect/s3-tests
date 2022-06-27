@@ -4472,7 +4472,7 @@ def test_bucket_create_exists_nonowner():
     e = assert_raises(ClientError, alt_client.create_bucket, Bucket=bucket_name)
     status, error_code = _get_status_and_error_code(e.response)
     eq(status, 409)
-    eq(error_code, 'BucketAlreadyExists')
+    ok(error_code in ['BucketAlreadyExists', 'BucketAlreadyOwnedByYou'])
 
 @attr(resource='bucket')
 @attr(method='put')
