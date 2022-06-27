@@ -1700,7 +1700,7 @@ def test_bucket_list_return_data_versioning():
     bucket = get_new_bucket_resource(bucket_name)
     check_configure_versioning_retry(bucket_name, "Enabled", "Enabled")
     key_names = ['bar', 'baz', 'foo']
-    _create_objects(bucketp=bucket, bucket_name=bucket_name, keys=key_names)
+    _create_objects(bucket=bucket, bucket_name=bucket_name, keys=key_names)
 
     client = get_client()
     data = {}
